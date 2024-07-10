@@ -91,9 +91,14 @@ const Filters = (props: FiltersProps) => {
                     </View>
                 ))}
             </ScrollView>
+
             <View style={styles.footer}>
-                <Button title='Clear All' onPress={clearFilters} />
-                <Button title='Apply' onPress={apply} />
+                <TouchableOpacity style={styles.btnContainerSecondary} onPress={clearFilters} >
+                    <Text style={styles.secondaryCta}>Clear All</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.btnContainerPrimary} onPress={apply} >
+                    <Text style={styles.primaryCta}>Apply</Text>
+                </TouchableOpacity>
             </View>
         </View>
     );
@@ -154,6 +159,12 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         backgroundColor: 'white',
     },
+    btnContainerPrimary: { width: 150, height: 60, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(89, 189, 169, 1)', borderRadius: 12 },
+    secondaryCta: { fontFamily: "Duru Sans", color: "black", fontSize: 16 },
+    primaryCta: { fontFamily: "Duru Sans", color: "white", fontSize: 16 },
+    btnContainerSecondary: { width: 150, height: 60, justifyContent: 'center', alignItems: 'center', borderColor: 'rgba(89, 189, 169, 1)', borderRadius: 12 },
+
+
 });
 
 export default Filters;
