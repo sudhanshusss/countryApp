@@ -1,10 +1,30 @@
-import React from 'react'
-import { Button, Text, View } from 'react-native'
+import React from 'react';
+import { Button, Text, View, StyleSheet } from 'react-native';
 
 const EmptyState = (props: { onPress: () => void }) => {
-    return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text style={{ marginBottom: 20, textAlign: 'center', color: 'black', fontSize: 20, width: 300 }}>Oops... We could not find country that satisfies your search criteria </Text>
-        <Button title='Clear Filters' onPress={props.onPress} />
-    </View>
-}
-export default EmptyState
+    return (
+        <View style={styles.container}>
+            <Text style={styles.text}>
+                Oops... We could not find a country that satisfies your search criteria
+            </Text>
+            <Button title='Clear Filters' onPress={props.onPress} />
+        </View>
+    );
+};
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    text: {
+        marginBottom: 20,
+        textAlign: 'center',
+        color: 'black',
+        fontSize: 20,
+        width: 300,
+    },
+});
+
+export default EmptyState;

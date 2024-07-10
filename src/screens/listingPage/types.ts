@@ -77,7 +77,7 @@ export interface Country {
 
 export interface FilterItem {
     text: string,
-    value: string,
+    value: string | boolean,
     key: string
 }
 export interface FiltersProps {

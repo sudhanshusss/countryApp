@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Image, Text, View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Country } from '../types';
 import { PopulationIcon } from '../../../../assets/svg';
@@ -7,13 +7,13 @@ import { NavigationProp, useNavigation } from '@react-navigation/native';
 const ListingItem = (props: Country) => {
     const languages = Object.keys(props?.languages ?? {}).map((item, index) => props.languages[item]);
     const navigation = useNavigation<NavigationProp<any, any>>();
-
+    const handleNavigation = useCallback(() => {
+        navigation.navigate("Details", { ...props });
+    }, [props])
     return (
         <TouchableOpacity
             activeOpacity={1}
-            onPress={() => {
-                navigation.navigate("Details", { ...props });
-            }}
+            onPress={handleNavigation}
             style={styles.touchableOpacity}
         >
             <View style={styles.container}>

@@ -11,6 +11,8 @@ import Loader from "./components/Loader";
 import { Country, FilterItem } from "./types";
 import { debounce } from "./utils";
 
+const BASE_URL = "https://restcountries.com/v3.1"
+
 const ListingPage = () => {
     const [countryList, setCountryList] = useState<Country[]>([]);
     const [finalCountryList, setFinalCountryList] = useState<Country[]>([]);
@@ -22,7 +24,7 @@ const ListingPage = () => {
     const getCountryList = async () => {
         try {
             setLoading(true);
-            const response = await axios.get("https://restcountries.com/v3.1/all");
+            const response = await axios.get(`${BASE_URL}/all`);
             setCountryList(response.data);
             setLoading(false);
         } catch (err) {
@@ -38,6 +40,7 @@ const ListingPage = () => {
     const sheetRef = useRef<any>(null);
 
     const updateFilters = useCallback((filter: FilterItem) => {
+        //Resetting search box when any filter is added by a user 
         setSearchKeyword("");
         const newActiveFilter = { ...activeFilters };
         if (newActiveFilter[filter.key] === filter.value) {
@@ -48,16 +51,20 @@ const ListingPage = () => {
         setActiveFilters(newActiveFilter);
     }, [activeFilters]);
 
+
+    //Called when text is changed in search box
     const updateSearchQuery = useCallback((value: string) => {
+        //We are removing all active filters for sake of simple UX
         debouncedFetch(value)
         setActiveFilters({});
         setSearchKeyword(value);
     }, []);
 
-    const debouncedFetch = debounce((name: any) => {
+    //debounced api call for fetching name
+    const debouncedFetch = debounce(async (name: any) => {
         try {
             setLoading(true)
-            axios.get(`https://restcountries.com/v3.1/name/${name}?fullText=false`).then((response) => {
+            axios.get(`${BASE_URL}/name/${name}?fullText=false`).then((response) => {
                 const countries = response.data
                 setFinalCountryList(countries)
             })
@@ -67,29 +74,34 @@ const ListingPage = () => {
         }
         finally {
             setLoading(false)
-
         }
     }, 500)
-    useEffect(() => {
-        if (searchKeyword) {
-            return;
-        } else {
-            const filteredCountries = countryList.filter((country: any) => {
-                let truth = true;
-                Object.keys(activeFilters).forEach((item) => {
-                    truth = truth && country[item] === activeFilters[item];
-                });
-                return truth;
+
+
+    //Updating list after applying all filters 
+    const updateFilteredData = () => {
+        const filteredCountries = countryList.filter((country: any) => {
+            let truth = true;
+            //look for all the keys in filters for match with given countries 
+            Object.keys(activeFilters).forEach((item) => {
+                truth = truth && country[item] === activeFilters[item];
             });
-            setFinalCountryList(filteredCountries);
+            return truth;
+        });
+        setFinalCountryList(filteredCountries);
+    }
+
+    useEffect(() => {
+        if (!searchKeyword) {
+            setFinalCountryList(countryList)
         }
-    }, [activeFilters, searchKeyword, countryList]);
+    }, [searchKeyword, countryList]);
 
     const renderItem = useCallback(({ item, index }: { item: Country; index: number }) => {
         return <ListingItem {...item} />;
     }, []);
 
-    const snapPoints = useMemo(() => ['90%'], []);
+    const snapPoints = ['90%']
 
     const clearFilters = useCallback(() => {
         setActiveFilters({});
@@ -97,15 +109,16 @@ const ListingPage = () => {
         closeBottomSheet()
     }, []);
 
-    const closeBottomSheet = useCallback(() => {
+    const closeBottomSheet = () => {
         sheetRef?.current?.close();
         setBottomsheetVisible(false)
-    }, []);
-
+    }
+    const applyFilters = useCallback(() => {
+        updateFilteredData()
+        closeBottomSheet()
+    }, [activeFilters])
     const openBottomSheet = useCallback(() => {
         setBottomsheetVisible(true);
-
-
     }, []);
 
     const handleSheetChanges = useCallback((index: number) => {
@@ -141,7 +154,7 @@ const ListingPage = () => {
                 onChange={handleSheetChanges}
             >
                 <View style={styles.bottomSheetContainer}>
-                    <Filters clearFilters={clearFilters} apply={closeBottomSheet} activeFilters={activeFilters} updateFilters={updateFilters} />
+                    <Filters clearFilters={clearFilters} apply={applyFilters} activeFilters={activeFilters} updateFilters={updateFilters} />
                 </View>
             </BottomSheet> : null}
         </View>
