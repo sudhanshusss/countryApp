@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
         borderColor: 'black',
         alignItems: 'center',
         paddingBottom: 8,
-        paddingHorizontal: 16, // Add padding for better touch area
+        paddingHorizontal: 16,
     },
     title: {
         color: "black",
@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
     },
     valueContainer: {
         flex: 1,
-        alignItems: 'flex-end', // Align value to the end of container
+        alignItems: 'flex-start',
     },
     valueText: {
         color: "black",
@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
     image: {
         width: 24,
         height: 24,
-        borderRadius: 12, // Apply border radius for circular images
+        borderRadius: 12,
     },
 });
 
