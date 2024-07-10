@@ -81,7 +81,7 @@ export interface FilterItem {
     key: string
 }
 export interface FiltersProps {
-    activeFilters: { [key: string]: string | boolean },
+    activeFilters: any,
     updateFilters: (filter: FilterItem) => void
     apply: () => void;
     clearFilters: () => void

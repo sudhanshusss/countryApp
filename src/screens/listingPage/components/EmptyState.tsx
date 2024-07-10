@@ -4,9 +4,7 @@ import { Button, Text, View, StyleSheet } from 'react-native';
 const EmptyState = (props: { onPress: () => void }) => {
     return (
         <View style={styles.container}>
-            <Text style={styles.text}>
-                Oops... We could not find a country that satisfies your search criteria
-            </Text>
+            <Text style={styles.message}>Oops... We could not find a country that satisfies your search criteria</Text>
             <Button title='Clear Filters' onPress={props.onPress} />
         </View>
     );
@@ -18,11 +16,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    text: {
+    message: {
         marginBottom: 20,
         textAlign: 'center',
         color: 'black',
-        fontSize: 20,
+        fontSize: 20, // Adjust as per your design
         width: 300,
     },
 });

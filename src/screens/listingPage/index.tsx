@@ -1,6 +1,6 @@
 import axios from "axios";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, Alert, StyleSheet } from "react-native";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { View, Text, StyleSheet, Alert, SafeAreaView } from "react-native";
 import ListingItem from "./components/ListingItem";
 import SearchBox from "./components/SearchBox";
 import { FlashList } from "@shopify/flash-list";
@@ -11,15 +11,15 @@ import Loader from "./components/Loader";
 import { Country, FilterItem } from "./types";
 import { debounce } from "./utils";
 
-const BASE_URL = "https://restcountries.com/v3.1"
+const BASE_URL = "https://restcountries.com/v3.1";
 
 const ListingPage = () => {
     const [countryList, setCountryList] = useState<Country[]>([]);
     const [finalCountryList, setFinalCountryList] = useState<Country[]>([]);
-    const [searchKeyword, setSearchKeyword] = useState("");
+    const [searchKeyword, setSearchKeyword] = useState<string>("");
     const [activeFilters, setActiveFilters] = useState<{ [key: string]: string | boolean }>({});
-    const [loading, setLoading] = useState(false);
-    const [isBottomsheetVisible, setBottomsheetVisible] = useState(false);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [isBottomsheetVisible, setBottomsheetVisible] = useState<boolean>(false);
 
     const getCountryList = async () => {
         try {
@@ -27,9 +27,10 @@ const ListingPage = () => {
             const response = await axios.get(`${BASE_URL}/all`);
             setCountryList(response.data);
             setLoading(false);
-        } catch (err) {
+        } catch (error) {
             setLoading(false);
-            Alert.alert("Something went wrong");
+            Alert.alert("Error", "Failed to fetch country list.");
+            console.error("Error fetching country list:", error);
         }
     };
 
@@ -37,10 +38,9 @@ const ListingPage = () => {
         getCountryList();
     }, []);
 
-    const sheetRef = useRef<any>(null);
+    const sheetRef = useRef<BottomSheet>(null);
 
     const updateFilters = useCallback((filter: FilterItem) => {
-        //Resetting search box when any filter is added by a user 
         setSearchKeyword("");
         const newActiveFilter = { ...activeFilters };
         if (newActiveFilter[filter.key] === filter.value) {
@@ -51,49 +51,34 @@ const ListingPage = () => {
         setActiveFilters(newActiveFilter);
     }, [activeFilters]);
 
-
-    //Called when text is changed in search box
     const updateSearchQuery = useCallback((value: string) => {
-        //We are removing all active filters for sake of simple UX
-        debouncedFetch(value)
+        debouncedFetch(value);
         setActiveFilters({});
         setSearchKeyword(value);
     }, []);
 
-    //debounced api call for fetching name
-    const debouncedFetch = debounce(async (name: any) => {
+    const debouncedFetch = useRef(debounce(async (name: string) => {
         try {
-            setLoading(true)
-            axios.get(`${BASE_URL}/name/${name}?fullText=false`).then((response) => {
-                const countries = response.data
-                setFinalCountryList(countries)
-            })
+            setLoading(true);
+            const response = await axios.get(`${BASE_URL}/name/${name}?fullText=false`);
+            setFinalCountryList(response.data);
+        } catch (error) {
+            console.error("Error fetching countries by name:", error);
+        } finally {
+            setLoading(false);
         }
-        catch (err) {
-            console.log(err)
-        }
-        finally {
-            setLoading(false)
-        }
-    }, 500)
+    }, 500)).current;
 
-
-    //Updating list after applying all filters 
-    const updateFilteredData = () => {
+    const updateFilteredData = useCallback(() => {
         const filteredCountries = countryList.filter((country: any) => {
-            let truth = true;
-            //look for all the keys in filters for match with given countries 
-            Object.keys(activeFilters).forEach((item) => {
-                truth = truth && country[item] === activeFilters[item];
-            });
-            return truth;
+            return Object.keys(activeFilters).every((key) => country[key] === activeFilters[key]);
         });
         setFinalCountryList(filteredCountries);
-    }
+    }, [activeFilters, countryList]);
 
     useEffect(() => {
         if (!searchKeyword) {
-            setFinalCountryList(countryList)
+            setFinalCountryList(countryList);
         }
     }, [searchKeyword, countryList]);
 
@@ -101,67 +86,73 @@ const ListingPage = () => {
         return <ListingItem {...item} />;
     }, []);
 
-    const snapPoints = ['90%']
+    const snapPoints = ['90%'];
 
     const clearFilters = useCallback(() => {
         setActiveFilters({});
         setSearchKeyword("");
-        closeBottomSheet()
+        closeBottomSheet();
+        setFinalCountryList(countryList)
+    }, [countryList]);
+
+    const closeBottomSheet = useCallback(() => {
+        sheetRef.current?.close();
+        setBottomsheetVisible(false);
     }, []);
 
-    const closeBottomSheet = () => {
-        sheetRef?.current?.close();
-        setBottomsheetVisible(false)
-    }
     const applyFilters = useCallback(() => {
-        updateFilteredData()
-        closeBottomSheet()
-    }, [activeFilters])
+        updateFilteredData();
+        closeBottomSheet();
+    }, [updateFilteredData]);
+
     const openBottomSheet = useCallback(() => {
         setBottomsheetVisible(true);
     }, []);
 
     const handleSheetChanges = useCallback((index: number) => {
         if (index !== -1) {
-            sheetRef.current.snapToIndex(index);
-        }
-        else {
-            setBottomsheetVisible(false)
+            sheetRef.current?.snapToIndex(index);
+        } else {
+            setBottomsheetVisible(false);
         }
     }, []);
+
     return (
-
-        <View style={styles.container}>
-            <SearchBox openFilters={openBottomSheet} keyword={searchKeyword} setSearchKeyword={updateSearchQuery} />
-            <Text style={styles.resultsText}>Showing {finalCountryList.length} results</Text>
-            {loading ? <Loader /> : finalCountryList?.length === 0 ? <EmptyState onPress={clearFilters} /> :
-                <FlashList
-                    bounces={true}
-                    horizontal={false}
-                    estimatedItemSize={122}
-                    data={finalCountryList}
-                    renderItem={renderItem}
-                />}
-            {isBottomsheetVisible ? <BottomSheet
-                ref={sheetRef}
-                index={0}
-                snapPoints={snapPoints}
-
-                onClose={() => {
-                    sheetRef.current?.close();
-                }}
-                enablePanDownToClose
-                onChange={handleSheetChanges}
-            >
-                <View style={styles.bottomSheetContainer}>
-                    <Filters clearFilters={clearFilters} apply={applyFilters} activeFilters={activeFilters} updateFilters={updateFilters} />
-                </View>
-            </BottomSheet> : null}
-        </View>
-    )
+        <SafeAreaView style={styles.safeAreaView}>
+            <View style={styles.container}>
+                <SearchBox openFilters={openBottomSheet} keyword={searchKeyword} setSearchKeyword={updateSearchQuery} />
+                <Text style={styles.resultsText}>Showing {finalCountryList.length} results</Text>
+                {loading ? <Loader /> : finalCountryList.length === 0 ? <EmptyState onPress={clearFilters} /> :
+                    <FlashList
+                        bounces
+                        horizontal={false}
+                        estimatedItemSize={122}
+                        data={finalCountryList}
+                        renderItem={renderItem}
+                    />}
+                {isBottomsheetVisible && (
+                    <BottomSheet
+                        ref={sheetRef}
+                        index={0}
+                        snapPoints={snapPoints}
+                        onClose={closeBottomSheet}
+                        enablePanDownToClose
+                        onChange={handleSheetChanges}
+                    >
+                        <View style={styles.bottomSheetContainer}>
+                            <Filters clearFilters={clearFilters} apply={applyFilters} activeFilters={activeFilters} updateFilters={updateFilters} />
+                        </View>
+                    </BottomSheet>
+                )}
+            </View>
+        </SafeAreaView>
+    );
 };
 
 const styles = StyleSheet.create({
+    safeAreaView: {
+        flex: 1,
+    },
     container: {
         flex: 1,
         backgroundColor: "white",
@@ -171,11 +162,11 @@ const styles = StyleSheet.create({
         paddingLeft: 10,
         fontFamily: "Duru Sans",
         fontSize: 16,
-        paddingBottom: 10
+        paddingBottom: 10,
     },
     bottomSheetContainer: {
         flex: 1,
-        alignItems: 'center',
+        alignItems: "center",
     },
 });
 

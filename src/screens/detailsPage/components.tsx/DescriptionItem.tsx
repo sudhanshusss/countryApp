@@ -1,9 +1,23 @@
 import React from "react";
 import { Text, TouchableOpacity, View, Image, StyleSheet } from "react-native";
 
-const DescriptionItem = (props: { title: string, value?: any, isValueClickable?: boolean, onClick?: () => void, image?: string, type?: "Image" | "text" }) => {
-    const { title, value, isValueClickable, onClick, image, type = "text" } = props;
+interface DescriptionItemProps {
+    title: string;
+    value?: string;
+    isValueClickable?: boolean;
+    onClick?: () => void;
+    image?: string;
+    type?: "Image" | "text";
+}
 
+const DescriptionItem: React.FC<DescriptionItemProps> = ({
+    title,
+    value,
+    isValueClickable,
+    onClick,
+    image,
+    type = "text",
+}) => {
     return (
         <TouchableOpacity
             activeOpacity={isValueClickable ? 0.7 : 1}
@@ -15,7 +29,7 @@ const DescriptionItem = (props: { title: string, value?: any, isValueClickable?:
                 {type === 'text' ? (
                     <Text style={styles.valueText}>{value}</Text>
                 ) : (
-                    <Image source={{ uri: image }} style={styles.image} />
+                    <Image source={{ uri: image }} style={styles.image} resizeMode="cover" />
                 )}
             </View>
         </TouchableOpacity>
@@ -30,6 +44,7 @@ const styles = StyleSheet.create({
         borderColor: 'black',
         alignItems: 'center',
         paddingBottom: 8,
+        paddingHorizontal: 16, // Add padding for better touch area
     },
     title: {
         color: "black",
@@ -54,6 +69,7 @@ const styles = StyleSheet.create({
     image: {
         width: 24,
         height: 24,
+        borderRadius: 12, // Apply border radius for circular images
     },
 });
 

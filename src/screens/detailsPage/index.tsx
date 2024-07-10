@@ -1,76 +1,82 @@
-import { useRoute } from "@react-navigation/native";
 import React from "react";
-import { Dimensions, Image, Text, View, ScrollView, Linking, TouchableOpacity, StyleSheet } from "react-native";
+import { Dimensions, Image, Text, View, ScrollView, Linking, StyleSheet, SafeAreaView } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 import { capitalizeFirstLetter } from "../listingPage/utils";
 import DescriptionItem from "./components.tsx/DescriptionItem";
 import { Country } from "../listingPage/types";
 
-const CountryDetailPage = (props: Country) => {
-    const country: Country | undefined = useRoute().params as Country;
-    const languages = Object.keys(country?.languages ?? {}).map((item, index) => country?.languages[item]);
-    const currencies = Object.keys(country?.currencies ?? {}).map((item, index) => {
-        return country?.currencies?.[item]?.name + "(" + country?.currencies?.[item]?.symbol + ")";
-    });
+interface CountryDetailPageProps {
+    route: { params: Country };
+}
+
+const CountryDetailPage: React.FC<CountryDetailPageProps> = ({ route }) => {
+    const country: Country | undefined = route.params;
+    const languages = Object.keys(country?.languages ?? {}).map((item) => country?.languages[item]);
+    const currencies = Object.keys(country?.currencies ?? {}).map((item) => `${country?.currencies?.[item]?.name} (${country?.currencies?.[item]?.symbol})`);
 
     const openImage = (url: string) => {
         Linking.openURL(url);
     };
 
     return (
-        <ScrollView contentContainerStyle={styles.scrollViewContainer}>
-            <View style={styles.imageContainer}>
-                <Image
-                    style={styles.image}
-                    resizeMode="cover"
-                    source={{ uri: country?.flags?.png }}
-                />
-            </View>
-            <LinearGradient
-                colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.5)', 'rgba(0,0,0,1)']}
-                style={styles.gradientContainer}
-            >
-                <Text style={styles.commonName}>{country?.name.common}</Text>
-                <Text style={styles.officialName}>{country?.name.official}</Text>
-                <View style={styles.languagesContainer}>
-                    {languages.map((item, index) => (
-                        <React.Fragment key={index}>
-                            <Text style={styles.languageText}>{item}</Text>
-                            {index !== languages.length - 1 && <View style={styles.dot} />}
-                        </React.Fragment>
-                    ))}
-                </View>
-            </LinearGradient>
-            <View style={styles.detailsContainer}>
-                <DescriptionItem title="Capital" value={country?.capital?.join(",") ?? ""} />
-                <DescriptionItem title="Population" value={country?.population ?? ""} />
-                <DescriptionItem title="Region" value={country?.region ?? ""} />
-                <DescriptionItem title="Sub-region" value={country?.subregion ?? ""} />
-                <DescriptionItem title="Time zones" value={country?.timezones ?? ""} />
-                <DescriptionItem title="Area" value={country?.area ?? ""} />
-                {country?.coatOfArms?.png &&
-                    <DescriptionItem
-                        title="Coat of arms"
-                        image={country?.coatOfArms.png ?? ""}
-                        type="Image"
-                        isValueClickable={true}
-                        onClick={() => { openImage(country?.coatOfArms?.png ?? "") }}
+        <SafeAreaView style={styles.container}>
+            <ScrollView contentContainerStyle={styles.scrollViewContainer}>
+                <View style={styles.imageContainer}>
+                    <Image
+                        style={styles.image}
+                        resizeMode="cover"
+                        source={{ uri: country?.flags?.png }}
                     />
-                }
-                <DescriptionItem title="Currencies" value={currencies.join(",") ?? ""} />
-                <DescriptionItem title="Start of week" value={capitalizeFirstLetter(country?.startOfWeek ?? "")} />
-                <DescriptionItem title="Landlocked" value={country?.landlocked ? "Yes" : "No"} />
-                <DescriptionItem title="Independent" value={country?.independent ? "Yes" : "No"} />
-                <DescriptionItem title="UN Member" value={country?.unMember ? "Yes" : "No"} />
-            </View>
-        </ScrollView>
+                </View>
+                <LinearGradient
+                    colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.5)', 'rgba(0,0,0,1)']}
+                    style={styles.gradientContainer}
+                >
+                    <Text style={styles.commonName}>{country?.name.common}</Text>
+                    <Text style={styles.officialName}>{country?.name.official}</Text>
+                    <View style={styles.languagesContainer}>
+                        {languages.map((item, index) => (
+                            <React.Fragment key={index}>
+                                <Text style={styles.languageText}>{item}</Text>
+                                {index !== languages.length - 1 && <View style={styles.dot} />}
+                            </React.Fragment>
+                        ))}
+                    </View>
+                </LinearGradient>
+                <View style={styles.detailsContainer}>
+                    <DescriptionItem title="Capital" value={country?.capital?.join(", ") ?? ""} />
+                    <DescriptionItem title="Population" value={country?.population?.toString() ?? ""} />
+                    <DescriptionItem title="Region" value={country?.region ?? ""} />
+                    <DescriptionItem title="Sub-region" value={country?.subregion ?? ""} />
+                    <DescriptionItem title="Time zones" value={country?.timezones?.join(", ") ?? ""} />
+                    <DescriptionItem title="Area" value={country?.area?.toString() ?? ""} />
+                    {country?.coatOfArms?.png &&
+                        <DescriptionItem
+                            title="Coat of arms"
+                            image={country?.coatOfArms.png ?? ""}
+                            type="Image"
+                            isValueClickable={true}
+                            onClick={() => { openImage(country?.coatOfArms?.png ?? "") }}
+                        />
+                    }
+                    <DescriptionItem title="Currencies" value={currencies.join(", ")} />
+                    <DescriptionItem title="Start of week" value={capitalizeFirstLetter(country?.startOfWeek ?? "")} />
+                    <DescriptionItem title="Landlocked" value={country?.landlocked ? "Yes" : "No"} />
+                    <DescriptionItem title="Independent" value={country?.independent ? "Yes" : "No"} />
+                    <DescriptionItem title="UN Member" value={country?.unMember ? "Yes" : "No"} />
+                </View>
+            </ScrollView>
+        </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: 'white',
+    },
     scrollViewContainer: {
         paddingBottom: 40,
-        backgroundColor: 'white',
     },
     imageContainer: {
         width: "100%",

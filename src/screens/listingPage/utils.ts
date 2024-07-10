@@ -1,6 +1,4 @@
-export const paginate = (data: any, skip: number, limit: number) => {
-    return data.slice(skip, limit)
-}
+
 export const capitalizeFirstLetter = (string: string) => {
     if (!string) return string;
     return string.charAt(0).toUpperCase() + string.slice(1);
