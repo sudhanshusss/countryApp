@@ -54,6 +54,7 @@ const ListingPage = () => {
     // Called when text is changed in search box
     const updateSearchQuery = useCallback((value: string) => {
         // We are removing all active filters for sake of simple UX
+
         debouncedFetch(value);
         setActiveFilters({});
         setSearchKeyword(value);
@@ -62,6 +63,10 @@ const ListingPage = () => {
     // Debounced API call for fetching name
     const debouncedFetch = debounce(async (name: any) => {
         try {
+            if (!name) {
+                setFinalCountryList(countryList)
+                return
+            }
             setLoading(true);
             const response = await axios.get(`${BASE_URL}/name/${name}?fullText=false`);
             const countries = response.data;
@@ -89,6 +94,7 @@ const ListingPage = () => {
 
     useEffect(() => {
         if (!searchKeyword) {
+            console.log(searchKeyword)
             setFinalCountryList(countryList);
         }
     }, [searchKeyword, countryList]);
