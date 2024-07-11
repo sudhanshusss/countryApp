@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { Image, Text, View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Country } from '../types';
-import { PopulationIcon } from '../../../../assets/svg';
+import { LanguageIcon, PopulationIcon } from '../../../../assets/svg';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 
 const ListingItem = (props: Country) => {
@@ -28,7 +28,7 @@ const ListingItem = (props: Country) => {
                                 <Text style={styles.infoText}>{props?.population}</Text>
                             </View>
                             <View style={styles.infoItem}>
-                                <PopulationIcon width={20} height={20} />
+                                <LanguageIcon width={20} height={20} />
                                 <Text style={styles.infoText}>{languages[0]}</Text>
                             </View>
                         </View>
