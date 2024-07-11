@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { FilterIcon } from "../../../../assets/svg";
+import { isIos } from "../utils";
 
 const SearchBox = (props: { keyword: string; setSearchKeyword: (value: string) => void; openFilters: () => void }) => {
     const { setSearchKeyword, keyword, openFilters } = props;
@@ -11,7 +12,7 @@ const SearchBox = (props: { keyword: string; setSearchKeyword: (value: string) =
     return (
         <View style={styles.container}>
             <View style={styles.inputContainer}>
-                <TextInput onChangeText={onChangeText} value={keyword} placeholder="Enter country name here" />
+                <TextInput style={{ paddingVertical: 10 }} onChangeText={onChangeText} value={keyword} placeholder="Enter country name here" />
             </View>
             <TouchableOpacity style={styles.filterButton} onPress={openFilters}>
                 <FilterIcon width={20} height={20} />

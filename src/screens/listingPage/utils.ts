@@ -1,8 +1,13 @@
+import { Platform } from "react-native";
 
 export const capitalizeFirstLetter = (string: string) => {
     if (!string) return string;
     return string.charAt(0).toUpperCase() + string.slice(1);
 };
+
+export const isIos = () => {
+    return Platform.OS === "ios"
+}
 export const debounce = <T extends any[]>(callback: (...args: T) => Promise<void>, delay: number) => {
     let timerId: NodeJS.Timeout;
 
