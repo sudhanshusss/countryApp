@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         textAlign: 'center',
         color: 'black',
-        fontSize: 20, // Adjust as per your design
+        fontSize: 20,
         width: 300,
     },
 });

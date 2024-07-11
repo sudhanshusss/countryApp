@@ -4,7 +4,6 @@ import { FilterIcon } from "../../../../assets/svg";
 
 const SearchBox = (props: { keyword: string; setSearchKeyword: (value: string) => void; openFilters: () => void }) => {
     const { setSearchKeyword, keyword, openFilters } = props;
-    const [value, setValue] = useState(keyword);
     const onChangeText = (text: string) => {
         setSearchKeyword(text);
     };
